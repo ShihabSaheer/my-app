@@ -3,9 +3,11 @@ pipeline {
 
     environment {
         IMAGE_NAME = "myapp"
+        CONTAINER_NAME = "myapp"
     }
 
     stages {
+
         stage('Checkout') {
             steps {
                 checkout scm
@@ -14,17 +16,28 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t $IMAGE_NAME:latest .'
+                sh '''
+                  docker build -t $IMAGE_NAME:latest .
+                '''
             }
         }
 
         stage('Deploy Container') {
             steps {
                 sh '''
-                  docker ps -q --filter "name=$IMAGE_NAME" | grep -q . && docker rm -f $IMAGE_NAME || true
-                  docker run -d -p 3000:3000 --name $IMAGE_NAME $IMAGE_NAME:latest
+                  docker rm -f $CONTAINER_NAME || true
+                  docker run -d -p 3000:3000 --name $CONTAINER_NAME $IMAGE_NAME:latest
                 '''
             }
+        }
+    }
+
+    post {
+        success {
+            echo '✅ Deployment successful'
+        }
+        failure {
+            echo '❌ Deployment failed'
         }
     }
 }
