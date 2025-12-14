@@ -1,10 +1,5 @@
 pipeline {
-    agent {
-        docker {
-            image 'docker:27.1.1-cli'
-            args '-v /var/run/docker.sock:/var/run/docker.sock'
-        }
-    }
+    agent any
 
     environment {
         IMAGE_NAME = "myapp"
@@ -21,15 +16,15 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t $IMAGE_NAME:latest .'
+                sh 'docker build -t ${IMAGE_NAME}:latest .'
             }
         }
 
         stage('Deploy Container') {
             steps {
                 sh '''
-                  docker rm -f $CONTAINER_NAME || true
-                  docker run -d -p 3000:3000 --name $CONTAINER_NAME $IMAGE_NAME:latest
+                  docker rm -f ${CONTAINER_NAME} || true
+                  docker run -d -p 3000:3000 --name ${CONTAINER_NAME} ${IMAGE_NAME}:latest
                 '''
             }
         }
