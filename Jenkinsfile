@@ -1,5 +1,10 @@
 pipeline {
-    agent any
+    agent {
+        dockerContainer {
+            image 'docker:27.1.1-cli'
+            args '-v /var/run/docker.sock:/var/run/docker.sock'
+        }
+    }
 
     environment {
         IMAGE_NAME = "myapp"
@@ -7,7 +12,6 @@ pipeline {
     }
 
     stages {
-
         stage('Checkout') {
             steps {
                 checkout scm
@@ -27,15 +31,6 @@ pipeline {
                   docker run -d -p 3000:3000 --name ${CONTAINER_NAME} ${IMAGE_NAME}:latest
                 '''
             }
-        }
-    }
-
-    post {
-        success {
-            echo '✅ Deployment successful'
-        }
-        failure {
-            echo '❌ Deployment failed'
         }
     }
 }
